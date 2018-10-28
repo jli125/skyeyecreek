@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 import json
 import sqlite3
 
+# define the app for the module
 app = Flask(__name__)
 
 @app.route("/api/v1/info")
