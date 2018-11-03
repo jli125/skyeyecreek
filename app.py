@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 import json
 import sqlite3
 
@@ -40,6 +40,32 @@ def list_users():
         api_list.append(a_dict)
     conn.close()
     return jsonify({'user_list':api_list})
+
+@app.route('/api/v1/users/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    return list_user(user_id)
+
+def list_user(user_id):
+    conn=sqlite3.connect('mydb.db')
+    print("Opened database successfully");
+    api_list=[]
+    cursor=conn.cursor()
+    cursor.execute("SELECT * from users where id=?",(user_id,))
+    data = cursor.fetchall()
+    if len(data)!=0:
+        user={}
+        user['username']=data[0][0]
+        user['name']=data[0][1]
+        user['email']=data[0][2]
+        user['password']=data[0][3]
+        user['id']=data[0][4]
+        api_list.append(user)
+    conn.close()
+    return jsonify(api_list)
+
+@app.errorhandler(404)
+def resource_not_found(error):
+    return make_response(jsonify({'error':'Resource not found!'}), 404)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
