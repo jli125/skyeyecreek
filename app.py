@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, make_response, request, abort
+from flask import Flask, jsonify, make_response, request, abort, url_for
 import json
 import sqlite3
+from time import gmtime, strftime
 
 # define the app for the module
 app = Flask(__name__)
@@ -166,6 +167,30 @@ def list_tweets():
     conn.close()
     return jsonify({'tweets_list':api_list})
 
+@app.route('/api/v2/tweets',methods=['POST'])
+def add_tweets():
+    user_tweet = {}
+    if not request.json or not 'username' in request.json or not 'body' in request.json:
+        abort(400)
+    user_tweet['username'] = request.json['username']
+    user_tweet['body'] = request.json['body']
+    user_tweet['created_at'] = strftime("%Y-%m-%dT%H:%M:%SZ",gmtime())
+    print(user_tweet)
+    return jsonify({'status':add_tweet(user_tweet)}),200
+
+def add_tweet(new_tweets):
+    conn = sqlite3.connect('mydb.db')
+    print("Opened database successfully");
+    cursor = conn.cursor()
+    cursor.execute("SELECT * from users where username=?",(new_tweets['username'],))
+    data = cursor.fetchall()
+
+    if len(data) == 0:
+        abort(404)
+    else:
+        cursor.execute("INSERT into tweets (username, body, tweet_time) values(?,?,?)",(new_tweets['username'],new_tweets['body'],new_tweets['created_at']))
+        conn.commit()
+    return "Success"
 
 
 @app.errorhandler(400)
