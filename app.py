@@ -185,11 +185,11 @@ def add_tweet(new_tweets):
     cursor.execute("SELECT * from users where username=?",(new_tweets['username'],))
     data = cursor.fetchall()
 
-    if len(data) == 0:
-        abort(404)
-    else:
-        cursor.execute("INSERT into tweets (username, body, tweet_time) values(?,?,?)",(new_tweets['username'],new_tweets['body'],new_tweets['created_at']))
-        conn.commit()
+#    if len(data) == 0:
+#        abort(404)
+#    else:
+    cursor.execute("INSERT into tweets (username, body, tweet_time) values(?,?,?)",(new_tweets['username'],new_tweets['body'],new_tweets['created_at']))
+    conn.commit()
     return "Success"
 
 
@@ -203,7 +203,7 @@ def resource_not_found(error):
 
 @app.errorhandler(409)
 def user_found(error):
-    return make_response(jsonify({'error':'COnflict! Record exist!'}), 404)
+    return make_response(jsonify({'error':'Conflict! Record exist!'}), 409)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
